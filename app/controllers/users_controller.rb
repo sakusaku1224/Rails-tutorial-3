@@ -15,6 +15,8 @@ class UsersController < ApplicationController
   def create
     @user = User.new(user_params)
     if @user.save
+      reset_session
+      log_in @user
       flash[:success] = 'Welcome to the Sumple App!'
       # リダイレクトを実行するとGETリクエストを送る /users/:id（新規のリクエストを発行する）
       # createでPOSTリクエストを送った処理の途中でGETリクエストを送る
