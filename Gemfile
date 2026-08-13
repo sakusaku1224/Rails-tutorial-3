@@ -3,8 +3,8 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby '3.2.10'
 
+gem 'bcrypt', '3.1.18'
 gem 'bootsnap', '1.16.0', require: false
-gem "bcrypt",          "3.1.18"
 gem 'bootstrap-sass', '3.4.1'
 gem 'concurrent-ruby', '1.3.4'
 gem 'importmap-rails', '1.1.5'
@@ -39,6 +39,8 @@ group :test do
   gem 'selenium-webdriver',       '4.8.3'
   gem 'webdrivers',               '5.2.0'
 end
-
+group :production do
+  gem 'pg', '1.3.5'
+end
 # Windows ではタイムゾーン情報用の tzinfo-data gem を含める必要があります
 # gem "tzinfo-data", platforms: %i[ mingw mswin x64_mingw jruby ]
