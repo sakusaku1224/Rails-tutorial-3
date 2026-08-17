@@ -13,6 +13,7 @@ class SessionsController < ApplicationController
       session[:user_id] = user.id
       # redirect_to user_path(@user)
       log_in user
+      params[:session][:remember_me] == '1' ? remember(user) : forget(user)
       redirect_to user
     else
       flash.now[:danger] = 'Invalid email/password'
@@ -23,7 +24,7 @@ class SessionsController < ApplicationController
   end
 
   def destroy
-    log_out
+    log_out if logged_in?
     # 303 See Otherステータスを指定することで、DELETEリクエスト後のリダイレクトが正しく振る舞うようにする
     redirect_to root_path, status: :see_other
   end
