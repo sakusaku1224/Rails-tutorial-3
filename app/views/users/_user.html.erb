@@ -1,0 +1,10 @@
+<li>
+  <%= gravatar_for user, size: 50 %>
+  <%= link_to user.name, user %>
+  <%# 管理者権限がある人は削除を実行できるが、本人のアカウントは削除できない %>
+  <% if current_user.admin? && !current_user?(user) %>
+  | <%= link_to "delete", user, data: { "turbo-method": :delete,
+                                        turbo_confirm: "You sure?" } %>
+  <% end %>
+  <%# user_path(user) => GET /users/:id メソッドとしてdeleteを渡す => DELETE / users/:id %>
+</li>
