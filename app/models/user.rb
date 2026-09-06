@@ -1,7 +1,8 @@
 class User < ApplicationRecord
-  attr_accessor :remember_token
+  attr_accessor :remember_token, :activation_token
 
-  before_save { self.email = email.downcase }
+  before_save   { email.downcase! }
+  before_create :create_activation_digest
 
   validates :name,  presence: true, length: { maximum: 50 }
 
@@ -33,21 +34,44 @@ class User < ApplicationRecord
     update_attribute(:remember_digest, User.digest(remember_token))
     remember_digest
   end
+
   # セッションハイジャック防止のためにセッショントークンを返す
   # この記憶ダイジェストを再利用しているのは単に利便性のため
   def session_token
     remember_digest || remember
   end
-  # 渡されたトークンがダイジェストと一致したらtrueを返す
-  def authenticated?(remember_token)
-    # nilの時は次の処理を実行しない
-    return false if remember_digest.nil?
 
-    BCrypt::Password.new(remember_digest).is_password?(remember_token)
+  # 渡されたトークンがダイジェストと一致したらtrueを返す
+  def authenticated?(attribute, token)
+    # digestを切り替えるためにattributeを渡す。それぞれの引数を指定する
+    digest = send("#{attribute}_digest")
+    # nilの時は次の処理を実行しない
+    return false if digest.nil?
+
+    BCrypt::Password.new(digest).is_password?(token)
   end
 
   # ユーザーのログイン情報を破棄する
   def forget
     update_attribute(:remember_digest, nil)
+  end
+
+  # 有効化用の処理
+  def activate
+    update_attribute(:activated,    true)
+    update_attribute(:activated_at, Time.zone.now)    
+  end
+  
+  # 有効化用のメーラを送信する
+  def send_activation_email
+    UserMailer.account_activation(self).deliver_now
+  end
+
+  private
+
+  # 有効かトークンを作成し、ハッシュ化したダイジェストを保存する
+  def create_activation_digest
+    self.activation_token = User.new_token
+    self.activation_digest = User.digest(activation_token)
   end
 end

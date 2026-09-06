@@ -13,13 +13,17 @@ module SessionsHelper
     cookies.permanent[:remember_token] = user.remember_token
   end
 
+  # ユーザーが誰か認証する
   def current_user
+    # クッキーの中にセッションが入っていればそのセッションを元にそのユーザーを探し、今のユーザーとして返す
     if (user_id = session[:user_id])
       user = User.find_by(id: user_id)
       @current_user = user if user && session[:session_token] == user.session_token
+
+    # セッションがなければ、永続クッキーの中にあるIDを参照し、既に認証記録のあるユーザーであればログイン状態を復元する
     elsif (user_id = cookies.encrypted[:user_id])
       user = User.find_by(id: user_id)
-      if user && user.authenticated?(cookies[:remember_token])
+      if user && user.authenticated?(:remember, cookies[:remember_token])
         log_in user
         @current_user = user
       end
