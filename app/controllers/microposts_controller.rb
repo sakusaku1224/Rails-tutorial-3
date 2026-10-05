@@ -7,6 +7,8 @@ class MicropostsController < ApplicationController
     # current_userを元にした関連付けによって生成されたメソッド
     # user_idがデフォルトで入った状態で作成できる
     @micropost = current_user.microposts.build(micropost_params)
+    # 画像を添付する
+    @micropost.image.attach(params[:micropost][:image])
     if @micropost.save
       flash[:success] = 'Micropost created!'
       redirect_to root_url
@@ -37,7 +39,7 @@ class MicropostsController < ApplicationController
 
   # ストロングパラメータではidは要らない。（currentuserで自動で入るから）contentのみでいい。
   def micropost_params
-    params.require(:micropost).permit(:content)
+    params.require(:micropost).permit(:content, :image)
   end
 
   # 消したい投稿の持ち主が自分でるか
